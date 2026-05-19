@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -9,46 +11,50 @@ class UserController extends Controller
 {
     public function index()
     {
-        return response()->json(User::all(),200);
+        $users = User::select('name','email')->paginate($this->paginate);
+        if($users->isEmpty()){
+            return apiResponse(404 , 'User not found');
+        }
+        return apiResponse(200 ,'Success',  $users);
     }
 
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
-        $user = User::create($request->all());
-        return response()->json($user,201);
+        $data = $request->validated();
+        $data['email_verified_at'] = now();
+        $user = User::create($data);
+        return apiResponse(200 , 'Created Sucessfully',$user);
 
     }
 
     public function show(string $id)
     {
-        $user = User::find($id);
-        if(!$user){
-            return response()->json([
-                'message' => 'User not found'
-            ],404);
-        }
+       $user = User::find($id);
+       if(!$user){
+           return apiResponse(404 , 'User not found');
+       }
+       return apiResponse(200 , 'success', new UserResource($user));
 
-        return response()->json($user,200);
     }
 
 
-    public function update(Request $request, string $id)
+    public function update(UserRequest $request, string $id)
     {
         $user = User::find($id);
         if(!$user){
-            return response()->json([
-                'message' => 'User not found'
-            ],404);
+            return apiResponse(404 , 'User not found');
         }
-        $user->update($request->all());
-        return response()->json($user,200);
-
+        $user->update($request->validated());
+        return apiResponse(200 , 'Updated Successfully', new UserResource($user));
     }
 
     public function destroy(string $id)
     {
-
-        $user = User::find($id);
+      $user = User::find($id);
+      if(!$user){
+          return apiResponse(404 , 'User not found');
+      }
         $user->delete();
+        return apiResponse(200 , 'Deleted Successfully');
     }
 }

@@ -2,7 +2,7 @@
 
 if(! function_exists('apiResponse')){
     function apiResponse($code , $message ,$data = null){
-        $response = [$message];
+        $response = ['messag'=>$message];
         if($data)
         {
             $response['data'] = $data;

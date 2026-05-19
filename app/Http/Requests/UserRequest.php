@@ -12,7 +12,7 @@ class UserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,8 +22,18 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
+        // check if request is update (PUT/PATCH) or store (POST)
+        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
+            return [
+                'name'     => 'sometimes|required|string',
+                'email'    => 'sometimes|required|email',
+                'password' => 'sometimes|required|min:8',
+            ];
+        }
+
+        // store rules
         return [
-            'name'     => 'required|string|max:255',
+            'name'     => 'required|string',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:8',
         ];
