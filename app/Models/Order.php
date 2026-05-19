@@ -13,4 +13,9 @@ class Order extends Model
             'quantity',
             'total_price',
         ];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

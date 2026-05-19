@@ -31,10 +31,12 @@ class OrderController extends Controller
     public function store(OrderRequest $request)
     {
         $product = Product::find($request->product_id);
+        $total   = $product->price * $request->quantity;
         $order = Order::create([
             'user_id'     => $request->user_id,
             'product_id'  => $request->product_id,
             'quantity'    => $request->quantity,
+            'total_price' => $total,
         ]);
 
         return apiResponse(201, 'Order Created Successfully',
@@ -58,9 +60,12 @@ class OrderController extends Controller
      */
     public function update(OrderRequest $request, Order $order)
     {
+        $total = $order->product->price * $request->quantity;
         $order->update([
             'quantity'    => $request->quantity,
+            'total_price' => $total,
         ]);
+
         return apiResponse(200, 'Updated Successfully',
             new OrderResource($order->load('user', 'product'))
         );
