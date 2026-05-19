@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductRequest;
+use App\Http\Resources\ProductCollection;
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -12,7 +15,12 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return response()->json(Product::all(),200);
+        $products = Product::select('id', 'name', 'price', 'description')
+            ->paginate($this->paginate);
+        if ($products->isEmpty()) {
+            return apiResponse(404, 'No Products Found');
+        }
+        return apiResponse(200, 'Success', new ProductCollection($products));
     }
 
 
@@ -20,11 +28,14 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $product = Product::create($request->all());
 
-        return response()->json($product,201);
+    public function store(ProductRequest $request)
+    {
+        $product = Product::create($request->validated());
+        if (!$product) {
+            return apiResponse(400, 'Try Again');
+        }
+        return apiResponse(201, 'Created Successfully', new ProductResource($product));
     }
 
     /**
@@ -32,19 +43,17 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-
-        return response()->json($product,200);
-
+        return apiResponse(200, 'Success', new ProductResource($product));
     }
 
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
-         $product->update($request->all());
-         return response()->json($product,200);
+        $product->update($request->validated());
+        return apiResponse(200, 'Updated Successfully', new ProductResource($product));
     }
 
     /**
@@ -53,5 +62,6 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
+        return apiResponse(200, 'Deleted Successfully');
     }
 }
