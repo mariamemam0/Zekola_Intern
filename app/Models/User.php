@@ -53,6 +53,13 @@ class User extends Authenticatable
         );
     }
 
+   //Scope
+    public function scopeVerified($query)
+    {
+        return $query->whereNotNull('email_verified_at');
+    }
+
+
 
 
 }
