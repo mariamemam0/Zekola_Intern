@@ -14,6 +14,10 @@ class Order extends Model
             'total_price',
         ];
 
+    protected $casts = [
+        'created_at'  => 'datetime',
+    ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);
