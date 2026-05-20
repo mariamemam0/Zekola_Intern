@@ -24,7 +24,8 @@ class OrderResource extends JsonResource
                 'name'  => $this->product->name,
                 'price' => $this->product->price,
             ],
-            'quantity'=>$this->quantity
+            'quantity'=>$this->quantity,
+            'total_price'=>$this->total_price,
         ];
     }
 }
